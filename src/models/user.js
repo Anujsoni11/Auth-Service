@@ -37,5 +37,11 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'User',
   });
+
+  User.beforeCreate((user) => {
+    const encryptedPassword = bcrypt.hash(user.password, SALT); // Use the imported SALT value for hashing
+    user.password = encryptedPassword ;
+  }); 
+
   return User;
 };
