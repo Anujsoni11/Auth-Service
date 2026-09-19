@@ -1,0 +1,500 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+package.json
+README.md
+src/config/server-config.js
+src/controllers/user-controller.js
+src/index.js
+src/migrations/20260418202359-create-user.js
+src/models/index.js
+src/models/user.js
+src/repository/User-repository.js
+src/routes/index.js
+src/routes/v1/index.js
+src/services/user-service.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+node_modules/
+.env
+src/config/config.json
+</file>
+
+<file path="src/controllers/user-controller.js">
+const UserService = require('../services/user-service');
+
+const userService=new UserService();
+
+const create =async (req,res)=>{
+    try {
+        const response=await userService.create({
+            email:req.body.email,
+            password:req.body.password
+            
+        });
+        return res.status(201).json({
+            success:true,
+            message:"Successfully created a new User",
+            data:response,
+            err:{}
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message:"Something went wrong",
+            data:{},
+            success:false,
+            err:error
+        })
+    }
+}
+
+const signIn= async(req,res)=>{
+    try {
+        const response=await userService.signIn(req.body.email,req.body.password);
+        return res.status(200).json({
+            success:true,
+            message:"Successfully signed In",
+            data:response,
+            err:{}
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message:"Something went wrong",
+            data:{},
+            success:false,
+            err:error
+        })
+    }
+}
+
+module.exports={
+    create,
+    signIn
+}
+</file>
+
+<file path="src/migrations/20260418202359-create-user.js">
+'use strict';
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('Users', {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      email: {
+        type: Sequelize.STRING,
+        allowNull:false,
+        unique:true,
+         validate:{
+        isEmail:true
+      }
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull:false,
+        validate:{
+          len:[3,100]
+      }
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      }
+    });
+  },
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('Users');
+  }
+};
+</file>
+
+<file path="src/models/index.js">
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const process = require('process');
+const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/../config/config.json')[env];
+const db = {};
+
+let sequelize;
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
+
+fs
+  .readdirSync(__dirname)
+  .filter(file => {
+    return (
+      file.indexOf('.') !== 0 &&
+      file !== basename &&
+      file.slice(-3) === '.js' &&
+      file.indexOf('.test.js') === -1
+    );
+  })
+  .forEach(file => {
+    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    db[model.name] = model;
+  });
+
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
+</file>
+
+<file path="src/routes/index.js">
+const express=require('express');
+
+const v1ApiRoutes=require('./v1/index');
+
+const router=express.Router();
+
+router.use('/v1',v1ApiRoutes);
+
+module.exports =router;
+</file>
+
+<file path="src/routes/v1/index.js">
+const express=require('express');
+
+const UserController=require('../../controllers/user-controller');
+
+const router=express.Router();
+
+router.post('/signup',UserController.create);
+router.post('/signin',UserController.signIn);
+
+module.exports=router;
+</file>
+
+<file path="README.md">
+Auth Microservice
+
+```sequelize init```
+
+``` npx sequelize db:create```
+
+
+``` npx sequelize model:generate --name User --attributes email:String password:String```
+
+
+``` npx sequelize db:migrate```
+</file>
+
+<file path="src/repository/User-repository.js">
+const {User}=require('../models/index')
+
+class UserRepository{
+
+    async create(data){
+        try {
+            const user= await User.create(data);
+            return user;
+        } catch (error) {
+            console.log('Something went wrong on repository layer');
+            throw error;
+        }
+    }
+
+    async destroy(userId){
+        try {
+            await User.destroy({where:{
+                id:userId
+            }
+            });
+            return true;
+        } catch (error) {
+            console.log('Something went wrong on repository layer');
+            throw error;
+        }
+    }
+
+    async getById(userId){
+        try {
+            const user=await User.findByPk(userId,{
+                attributes:['email','id']
+            });
+            return user;
+        } catch (error) {
+            console.log('Something went wrong on repository layer');
+            throw error;
+        }
+    }
+
+    async getByEmail(userEmail){
+        try {
+            const user=await User.findOne({ where:{
+                    email:userEmail
+                }});
+            return user;
+        } catch (error) {
+            console.log('Something went wrong on repository layer');
+            throw error;
+        }
+    }
+}
+
+module.exports=UserRepository;
+</file>
+
+<file path="package.json">
+{
+  "name": "authservice",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx nodemon src/index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.2",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.1",
+    "sequelize": "^6.37.8",
+    "sequelize-cli": "^6.6.5"
+  }
+}
+</file>
+
+<file path="src/config/server-config.js">
+const dotenv =require('dotenv')
+const bcrypt=require('bcrypt')
+
+dotenv.config();
+
+module.exports={
+    PORT:process.env.PORT,
+    SALT:bcrypt.genSaltSync(10),
+    JWT_KEY:process.env.JWT_KEY
+}
+</file>
+
+<file path="src/models/user.js">
+'use strict';
+const {
+  Model
+} = require('sequelize');
+
+const bcrypt=require('bcrypt');
+const { SALT }=require('../config/server-config');
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+    }
+  }
+  User.init({
+    email: {
+      type:DataTypes.STRING,
+      allowNull:false,
+      unique:true,
+      validate:{
+        isEmail:true
+      }
+    },
+    password: {
+      type:DataTypes.STRING,
+      allowNull:false,
+      validate:{
+          len:[3,100]
+      }
+    },
+  }, {
+    sequelize,
+    modelName: 'User',
+  });
+  User.beforeCreate((user)=>{
+    const encryptedPassword=bcrypt.hashSync(user.password,SALT);
+    user.password = encryptedPassword;
+  })
+  return User;
+};
+</file>
+
+<file path="src/services/user-service.js">
+const UserRepository=require('../repository/User-repository');
+
+const jwt=require('jsonwebtoken');
+const bcrypt=require('bcrypt');
+const {JWT_KEY}=require('../config/server-config');
+
+class UserService {
+    constructor(){
+        this.userRepository = new UserRepository();
+    }
+
+    async create(data){
+        try {
+            const user=await this.userRepository.create(data);
+            return user;
+        } catch (error) {
+            console.log("Something went wrong in service layer");
+            throw error;
+        }
+    }
+
+    async signIn(email,plainPassword){
+        try {
+            //step1->fetch the user using email
+            const user=await this.userRepository.getByEmail(email);
+            //step2->compare incoming plain password with stored encrypted password
+            const passwordMatch=this.checkPassword(plainPassword,user.password);
+            if(!passwordMatch){
+                console.log("password doesn't match");
+                throw {error: 'Incorrect password'};
+            }
+            //step3->if passwords match then create a token and send it to the user
+            const newJWT= this.createToken({email:user.email,id:user.id});
+            return newJWT;
+
+        } catch (error) {
+            console.log("Something went wrong in service layer");
+            throw error;
+        }
+    }
+
+    createToken(user) {
+        try {
+            const result=jwt.sign(user,JWT_KEY,{expiresIn: '1h'});
+            return result;
+        } catch (error) {
+            console.log("Something went wrong in Token creation");
+            throw error;
+        }
+    }
+
+    verifyToken(token){
+        try {
+            const response=jwt.verify(token,JWT_KEY);
+            return response;
+        } catch (error) {
+            console.log("Something went wrong in Token validation",error);
+            throw error;
+        }
+    }
+
+    checkPassword(userInputPlainPassword,encryptedPassword){
+        try {
+            return bcrypt.compareSync(userInputPlainPassword,encryptedPassword);
+        } catch (error) {
+            console.log("Something went wrong in password comparison ");
+            throw error;
+        }
+    }
+}
+
+module.exports=UserService;
+</file>
+
+<file path="src/index.js">
+const express=require('express');
+const bodyParser=require('body-parser');
+
+const {PORT, JWT_KEY} =require('./config/server-config');
+const apiRoutes=require('./routes/index');
+
+const app=express();
+
+// const UserService=require('./services/user-service')
+
+const prepareAndStartServer = () => {
+
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({extended:true}));
+
+    app.use('/api',apiRoutes);
+    
+    app.listen(PORT,async() => {
+        console.log(`Server started on Port ${PORT}`);
+        // const service=new UserService();
+        // const newToken=service.createToken({email:'raivikas748@gmail.com',id : 1});
+        // console.log("new token is : ",newToken);
+        // const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhaXZpa2FzNzQ4QGdtYWlsLmNvbSIsImlkIjoxLCJpYXQiOjE3ODE0NDU2NDEsImV4cCI6MTc4MTQ0NTY3MX0.94C4fEMbIcjRHAvt8RvQeU1qvSwIN9GUWk_jnzu7n98'
+        // const verification=service.verifyToken(token,JWT_KEY);
+        // console.log(verification)
+
+       
+    })
+}
+
+prepareAndStartServer();
+</file>
+
+</files>
