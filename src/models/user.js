@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.belongsToMany(models.Role, {
+        through: 'User_Roles'
+      });
     }
   }
   User.init({
@@ -38,10 +41,9 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'User',
   });
 
-  User.beforeCreate((user)=>{ //in this beforeCreate hook whole user object is available that's by we are able to use user.password
+  User.beforeCreate((user) => {
     const encryptedPassword = bcrypt.hash(user.password, SALT); // Use the imported SALT value for hashing
     user.password = encryptedPassword ;
   }); 
-
   return User;
 };
