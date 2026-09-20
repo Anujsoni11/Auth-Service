@@ -1,4 +1,7 @@
 const { User, Role } = require('../models/index');
+const ClientError = require('../utlis/client-error');
+const { StatusCodes } = require('http-status-code');
+const ValidationError = require('../utlis/validation-error');
 
 class UserRepository {
 

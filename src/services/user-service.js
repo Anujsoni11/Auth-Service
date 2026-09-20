@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 
 const UserRepository = require('../repository/user-repository');
 const { JWT_KEY } = require('../config/serverConfig');
+const AppErrors = require('../utlis/error-handler');
+
 class UserService{
     constructor(){
         this.userRepository = new UserRepository();
