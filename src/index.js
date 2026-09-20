@@ -1,39 +1,54 @@
-const express=require('express');
-const bodyParser=require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const { PORT, JWT_KEY } = require('./config/serverConfig');
 
-const db=require('./models/index');
-const {PORT, JWT_KEY} =require('./config/server-config');
-const apiRoutes=require('./routes/index');
+const apiRoutes = require('./routes/index');
 
-const app=express();
-// const UserRepository =require('./repository/User-repository')
+// const {User} = require('./models/index');
+// const bcrypt = require('bcrypt');
 
-// const UserService=require('./services/user-service')
+// const UserRepository = require('./repository/user-repository');
 
-const prepareAndStartServer = () => {
-    app.listen(PORT,async() => {
-        console.log(`Server started on Port ${PORT}`);
+// const UserService = require('./services/user-service');
 
-        if(process.env.DB_SYNC){
-            db.sequelize.sync({alter:true});
-        }
-        
-        // const repo=new UserRepository();
-        // const response= await repo.getById(1);
-        // console.log(response);
+const db = require('./models/index');
 
-        // const service=new UserService();
-        // const newToken=service.createToken({email:'raivikas748@gmail.com',id : 1});
-        // console.log("new token is : ",newToken);
-        // const token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InJhaXZpa2FzNzQ4QGdtYWlsLmNvbSIsImlkIjoxLCJpYXQiOjE3ODE0NDU2NDEsImV4cCI6MTc4MTQ0NTY3MX0.94C4fEMbIcjRHAvt8RvQeU1qvSwIN9GUWk_jnzu7n98'
-        // const verification=service.verifyToken(token,JWT_KEY);
-        // console.log(verification)
-    })
+const prepareAndStartServer = async () => {
 
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({extended:true}));
+    app.use(bodyParser.urlencoded({ extended: true }));
 
-    app.use('/api',apiRoutes);
+    app.use('/api', apiRoutes);
+
+    app.listen(PORT, async () => {
+        console.log(`Server Started on PORT: ${PORT}`);
+        if (process.env.DB_SYNC) {
+            db.sequelize.sync({ alter: true });
+        }     // this will create the tables in the database if they don't exist, and update them if they do exist (alter: true)
+
+        // const u1 = await User.findByPk(4);
+        // const r1 = await Role.findByPk(1);
+        // // await u1.addRole(r1); // this will add the role to the user in the User_Roles table
+        // const response1 = await u1.getRoles(); // this will get all the roles of the user
+        // console.log(response1);
+        // const response2 = await u1.hasRole(r1); // this will check if the user has the role
+        // console.log(response2);
+
+
+        // const repo = new UserRepository();
+        // const response = await repo.getById(1);
+        // console.log(response);
+
+        // const incomingpassword = '123456';
+        // const user = await User.findByPk(3);
+        // const response = bcrypt.compareSync(incomingpassword, user.password);
+        // console.log(response);
+
+        // const service = new UserService();
+        // const newToken = service.createToken({email: 'anuj@admin.com', id: 1});
+        // console.log("New Token is:", newToken);
+    });
 }
 
 prepareAndStartServer();
